@@ -1,5 +1,7 @@
 //go:build tinygo
 
+#ifndef TINYGO_RTOS_PREEMPT
+
 // Only generate .debug_frame, don't generate .eh_frame.
 .cfi_sections .debug_frame
 
@@ -127,3 +129,4 @@ tinygo_swapTask:
     #endif
     .cfi_endproc
 .size tinygo_swapTask, .-tinygo_swapTask
+#endif

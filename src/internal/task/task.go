@@ -29,6 +29,8 @@ type Task struct {
 	// This extra field doesn't increase memory usage on 32-bit CPUs and above,
 	// since it falls into the padding of the FipsIndicator bit above.
 	RunState uint8
+	priorityState
+	preemptState
 
 	// Exited is set after a task with a releasable stack has finished.
 	Exited bool

@@ -38,6 +38,7 @@ func taskExit() {
 
 // initialize the state and prepare to call the specified function with the specified argument bundle.
 func (s *state) initialize(fn uintptr, args unsafe.Pointer, stackSize uintptr) {
+	stackSize = taskStackSize(stackSize)
 	// Create a stack.
 	stack := runtime_alloc(stackSize, gclayout.Conservative.AsPtr())
 
@@ -72,6 +73,7 @@ var startTask [0]uint8
 // The new goroutine is scheduled to run later.
 func start(fn uintptr, args unsafe.Pointer, stackSize uintptr) {
 	t := &Task{}
+	t.inheritPriority()
 	inheritSynctest(t)
 	addLiveTask(t)
 	t.state.initialize(fn, args, stackSize)

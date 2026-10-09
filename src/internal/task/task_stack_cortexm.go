@@ -1,4 +1,4 @@
-//go:build (scheduler.tasks || scheduler.cores) && cortexm
+//go:build (scheduler.tasks || scheduler.cores) && cortexm && !rtos.preempt
 
 package task
 

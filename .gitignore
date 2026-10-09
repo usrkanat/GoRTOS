@@ -45,3 +45,5 @@ wasm.wasm
 
 *.uf2
 *.elf
+
+.idea

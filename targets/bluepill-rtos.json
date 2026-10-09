@@ -1,0 +1,9 @@
+{
+	"inherits": ["bluepill"],
+	"build-tags": ["rtos", "rtos.preempt"],
+	"scheduler": "tasks",
+	"automatic-stack-size": false,
+	"default-stack-size": 2048,
+	"cflags": ["-DTINYGO_RTOS_PREEMPT"],
+	"extra-files": ["src/internal/task/task_stack_rtos_cortexm.S"]
+}

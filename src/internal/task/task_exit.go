@@ -36,6 +36,8 @@ func CoroExit(next *Task) {
 }
 
 func exit(goexit bool, next *Task) {
+	preemption := DisablePreemption()
+	defer RestorePreemption(preemption)
 	t := Current()
 	if hasReleasableStack {
 		t.Exited = true

@@ -54,6 +54,8 @@ var finalizerIdleGC func() bool
 //
 //go:noinline
 func deadlock() {
+	preemption := task.DisablePreemption()
+	defer task.RestorePreemption(preemption)
 	// Keep permanently blocked tasks reachable so their suspended stacks remain
 	// GC roots, but never put them back on the runnable queue.
 	current := task.Current()
@@ -95,11 +97,13 @@ func scheduleTask(t *task.Task) {
 }
 
 func scheduleTaskNoWake(t *task.Task) {
-	runqueue.Push(t)
+	schedulerEnqueue(t)
 }
 
 func Gosched() {
-	runqueue.Push(task.Current())
+	preemption := task.DisablePreemption()
+	defer task.RestorePreemption(preemption)
+	schedulerYield(task.Current())
 	task.Pause()
 }
 
@@ -202,7 +206,7 @@ func scheduler(returnAtDeadlock bool) {
 			sleepQueueBaseTime += timeUnit(t.Data)
 			sleepQueue = t.Next
 			t.Next = nil
-			runqueue.Push(t)
+			scheduleTaskNoWake(t)
 		}
 
 		// Check for expired timers to trigger.
@@ -217,7 +221,7 @@ func scheduler(returnAtDeadlock bool) {
 			tn.callback(tn, delay)
 		}
 
-		t := runqueue.Pop()
+		t := schedulerPopTask()
 		if t == nil {
 			// Run the pressure GC only when the scheduler is idle at the top level.
 			// This batches completed work and avoids collections during allocation.
@@ -296,6 +300,8 @@ func scheduler(returnAtDeadlock bool) {
 //
 //go:linkname sleep time.Sleep
 func sleep(duration int64) {
+	preemption := task.DisablePreemption()
+	defer task.RestorePreemption(preemption)
 	if duration <= 0 {
 		return
 	}
@@ -313,6 +319,7 @@ func run() {
 	initHeap()
 	go func() {
 		initAll()
+		schedulerInit()
 		callMain()
 		mainExited = true
 	}()

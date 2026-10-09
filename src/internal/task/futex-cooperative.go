@@ -16,12 +16,17 @@ type Futex struct {
 // to sleep. Return true if we were definitely awoken by a call to Wake or
 // WakeAll, and false if we can't be sure of that.
 func (f *Futex) Wait(cmp uint32) (awoken bool) {
-	if f.Uint32.v != cmp {
+	preemption := DisablePreemption()
+	defer RestorePreemption(preemption)
+	mask := lockAtomics()
+	if f.Uint32.Load() != cmp {
+		unlockAtomics(mask)
 		return false
 	}
 
 	// Push the current goroutine onto the waiter stack.
 	f.waiters.Push(Current())
+	unlockAtomics(mask)
 
 	// Pause until the waiters are awoken by Wake/WakeAll.
 	Pause()

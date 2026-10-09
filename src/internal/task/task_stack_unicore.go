@@ -1,4 +1,4 @@
-//go:build scheduler.tasks
+//go:build scheduler.tasks && !rtos.preempt
 
 package task
 
